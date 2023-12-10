@@ -2,14 +2,14 @@
 
 This repo contains all the smart contract for betblock.
 
-AI-generating NFTs on Avalanche Fuji Network using Chainlink Functions.
-
 These are some helpful snippets of code that compiles and deploys.
 
 ```shell
 npx hardhat compile
 npx hardhat setup-nft-contract --network fuji
+npx hardhat setup-fuji-lending-contract --network fuji
 ```
+Note: All contracts on Mumbai network were deployed with Remix. 
 
 ## Deployments
 
@@ -27,8 +27,14 @@ npx hardhat setup-nft-contract --network fuji
 | Contract               | Address                                            |
 | ---------------------- | ---------------------------------------------------|
 | pricing                | [``][] |
-| mars-account-nft       | [``][] |
-| mars-credit-manager    | [``][] |
+| ccip-sender            | [`0x8276C6236De14002C4750eE21C6169D29e78AA60`][] |
+| nft-minting            | [``][] |
+
+### Sepolia Network
+
+| Contract               | Address                                            |
+| ---------------------- | ---------------------------------------------------|
+| ccip-protocol           | [`0x865B3358db605d839E64EeE2eb501986eE777D6b`][] |
 
 
 ## Contract Overview 
@@ -56,8 +62,14 @@ This is a simple smart contract that gathers real time asset pricing by using Ch
 
 By leveraging Chainlink's CCIP for secure asset transfers and reliable price oracles and Data Feeds for real-time reliable asset prices, you can create a robust lending protocol that allows gamers on both Polygon and Avalanche to seamlessly borrow assets. This would enhance the gaming experience by enabling players to access the resources they need without liquidating their positions.
 
+The current smart contracts are a simplified Proof of Concept. With these contracts, you can either deposi MATIC as collateral on the Mumbai network and borrow LINK on the Mumbai network or you can deposit MATIC as collateral on the Fuji network and then borrow LINK tokens on the Mumbai network. 
+
+Since all the games so far are deployed on Polygon Mumbai and use LINK tokens to play the game, these lending contracts allow both Avalanche users and Polygon users to connect to the dApp and start playing games. 
+
 ### NFT Minting Contract 
 #### Uses Functions and Data Feeds
+
+NFTs are AI generated using chainink functions
 
 [1]: https://
 [2]: https://

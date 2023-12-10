@@ -27,27 +27,25 @@ contract LendingBorrowingContract is ReentrancyGuard {
     event BorrowTokens(address indexed borrower, uint256 amount);
     event RepayLoan(address indexed borrower, uint256 amount);
 
-    constructor(
-        address _borrowTokenAddress,
-        uint256 _collateralRate,
-        uint256 _interestRate 
-    ) {
-        borrowToken = IERC20(_borrowTokenAddress);
-        collateralRate = _collateralRate;
-        interestRate = _interestRate;
+    // collateralRate is currently hard coded at 150% and interestRate is hardcoded to 2% 
+    // These values should be optimized in the future through a proper asset specifc risk analysis 
+    constructor() {
+        linkToken = IERC20(0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846);
+        collateralRate = 150;
+        interestRate = 20000000000000000000;
         linkFeed = AggregatorV3Interface(0x34C4c526902d88a3Aa98DB8a9b802603EB1E3470);
         avaxFeed = AggregatorV3Interface(0x5498BB86BC934c8D34FDA08E81D444153d0D06aD);
     }
 
-    // Function to get the latest price of MATIC/USD from Chainlink
-    function getLatestMaticPrice() public view returns (int) {
+    // Function to get the latest price of Avax/USD from Chainlink
+    function getLatestAvaxPrice() public view returns (int) {
         (
             uint80 roundID,
             int price,
             uint startedAt,
             uint timeStamp,
             uint80 answeredInRound
-        ) = maticFeed.latestRoundData();
+        ) = avaxFeed.latestRoundData();
         require(timeStamp > 0, "Round not complete");
         return price;
     }
@@ -65,7 +63,7 @@ contract LendingBorrowingContract is ReentrancyGuard {
         return price;
     }
 
-    // Function to receive MATIC as collateral
+    // Function to receive AVAX as collateral
     function depositCollateral() external payable nonReentrant {
         require(msg.value > 0, "Amount must be greater than 0");
         borrowers[msg.sender].collateralDeposited += msg.value;
@@ -79,7 +77,7 @@ contract LendingBorrowingContract is ReentrancyGuard {
 
         borrowers[msg.sender].collateralDeposited -= amount;
         (bool sent, ) = msg.sender.call{value: amount}("");
-        require(sent, "Failed to send MATIC");
+        require(sent, "Failed to send AVAX");
         emit WithdrawCollateral(msg.sender, amount);
     }
 
@@ -115,7 +113,7 @@ contract LendingBorrowingContract is ReentrancyGuard {
     function getMaxWithdrawal(address borrower) public view returns (uint256) {
         BorrowerInfo memory info = borrowers[borrower];
         uint256 maxBorrowableUSD = getMaxBorrowable(borrower);
-        uint256 collateralValueUSD = info.collateralDeposited * uint256(getLatestMaticPrice()) / 1e8;
+        uint256 collateralValueUSD = info.collateralDeposited * uint256(getLatesAvaxPrice()) / 1e8;
         uint256 borrowedAmountUSD = info.tokensBorrowed * uint256(getLatestLinkPrice()) / 1e8;
 
         if (borrowedAmountUSD >= maxBorrowableUSD) {
@@ -123,16 +121,16 @@ contract LendingBorrowingContract is ReentrancyGuard {
         }
         // Calculating the remaining collateral in USD
         uint256 remainingCollateralUSD = collateralValueUSD - borrowedAmountUSD;
-        // Convert remainingCollateralUSD back to MATIC using the inverse of the current MATIC/USD price
-        uint256 collateralPriceUSD = uint256(getLatestMaticPrice());
+        // Convert remainingCollateralUSD back to AVAX using the inverse of the current AVAX/USD price
+        uint256 collateralPriceUSD = uint256(getLatestAvaxPrice());
         require(collateralPriceUSD > 0, "Invalid collateral price");
         uint256 remainingCollateral = (remainingCollateralUSD * 1e8) / collateralPriceUSD;
-        // Assuming that the collateral is in MATIC and we need to withdraw in MATIC
+        // Assuming that the collateral is in AVAX and we need to withdraw in AVAX
         return remainingCollateral;
     }
 
     function getMaxBorrowable(address borrower) public view returns (uint256) {
-        uint256 collateralValueUSD = borrowers[borrower].collateralDeposited * uint256(getLatestMaticPrice()) / 1e8;
+        uint256 collateralValueUSD = borrowers[borrower].collateralDeposited * uint256(getLatestAvaxPrice()) / 1e8;
         return (collateralValueUSD * collateralRate) / 100;
     }
 

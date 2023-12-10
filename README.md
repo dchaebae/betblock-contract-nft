@@ -1,13 +1,10 @@
 # betblock NFT contract
 
-This repo contains the smart contract for AI-generating NFTs on Avalanche Fuji Network using Chainlink Functions and Automation.
+This repo contains the smart contract for AI-generating NFTs on Avalanche Fuji Network using Chainlink Functions.
 
-Try running some of the following tasks:
+These are some helpful snippets of code that compiles and deploys.
 
 ```shell
-npx hardhat help
-npx hardhat test
-REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.js
+npx hardhat compile
+npx hardhat setup-nft-contract --network fuji
 ```

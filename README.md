@@ -20,14 +20,15 @@ npx hardhat setup-nft-contract --network fuji
 | roulette               | [`0xe99aA391B3C73A31Cc3e493dEC656cb32F3DA932`][1] |
 | slots                  | [`0x7c3EC70A5E196e5C3600D225e223162897d17679`][2] |
 | pricing                | [`0x03e1B02901579f731D2e5150134d0FB792d44708`][3] |
+| lend/borrow            | [`0x3a424f11E1A9C04c8AFE5bf853653EBb94EAF3A3`][4] |
 
 ### Avalanche Fuji Network
 
 | Contract               | Address                                            |
 | ---------------------- | ---------------------------------------------------|
-| pricing                | [``][1] |
-| mars-account-nft       | [``][2] |
-| mars-credit-manager    | [``][3] |
+| pricing                | [``][] |
+| mars-account-nft       | [``][] |
+| mars-credit-manager    | [``][] |
 
 
 ## Contract Overview 
@@ -51,7 +52,14 @@ This is a simple slot game where a user bets a certain amount of ether, and if t
 This is a simple smart contract that gathers real time asset pricing by using Chainlink Price Feeds
 
 ### DeFi Cross-Chain Lending 
-#### Uses Chainlink CCIP 
+#### Uses Chainlink CCIP and Data Feeds
+
+By leveraging Chainlink's CCIP for secure asset transfers and reliable price oracles and Data Feeds for real-time reliable asset prices, you can create a robust lending protocol that allows gamers on both Polygon and Avalanche to seamlessly borrow assets. This would enhance the gaming experience by enabling players to access the resources they need without liquidating their positions.
 
 ### NFT Minting Contract 
 #### Uses Functions and Data Feeds
+
+[1]: https://
+[2]: https://
+[3]: https://
+[4]: https://

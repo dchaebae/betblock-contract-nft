@@ -2,10 +2,9 @@
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@chainlink/contracts/src/v0.8/interfaces/AggregatorV3Interface.sol";
 
-contract LendingBorrowingContract is ReentrancyGuard {
+contract LendingBorrowingContract {
     IERC20 public borrowToken; // LINK token as the borrowable token
 
     AggregatorV3Interface internal avaxFeed; // Chainlink Price Feed for AVAX/USD
@@ -64,13 +63,13 @@ contract LendingBorrowingContract is ReentrancyGuard {
     }
 
     // Function to receive AVAX as collateral
-    function depositCollateral() external payable nonReentrant {
+    function depositCollateral() external payable {
         require(msg.value > 0, "Amount must be greater than 0");
         borrowers[msg.sender].collateralDeposited += msg.value;
         emit DepositCollateral(msg.sender, msg.value);
     }
 
-    function withdrawCollateral(uint256 amount) external nonReentrant {
+    function withdrawCollateral(uint256 amount) external {
         require(amount <= borrowers[msg.sender].collateralDeposited, "Not enough collateral deposited");
         uint256 maxWithdraw = getMaxWithdrawal(msg.sender);
         require(amount <= maxWithdraw, "Withdrawal request exceeds maximum allowed");
@@ -81,7 +80,7 @@ contract LendingBorrowingContract is ReentrancyGuard {
         emit WithdrawCollateral(msg.sender, amount);
     }
 
-    function borrowTokens(uint256 amount) external nonReentrant {
+    function borrowTokens(uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0");
         uint256 maxBorrow = getMaxBorrowable(msg.sender);
         require(amount <= maxBorrow, "Borrow amount exceeds limit");
@@ -92,7 +91,7 @@ contract LendingBorrowingContract is ReentrancyGuard {
         emit BorrowTokens(msg.sender, amount);
     }
 
-    function repayLoan(uint256 amount) external nonReentrant {
+    function repayLoan(uint256 amount) external {
         require(amount > 0, "Amount must be greater than 0");
         BorrowerInfo storage borrower = borrowers[msg.sender];
         uint256 owed = borrower.tokensBorrowed + borrower.interestOwed;

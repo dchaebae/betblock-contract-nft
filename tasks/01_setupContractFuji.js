@@ -17,7 +17,6 @@ task("setup-nft-contract", "deploy ProfileNFTContract.sol").setAction(async (tas
   console.log(`\nDeploying ProfileNFTContract.sol to ${network.name}...`)
   const factory = await ethers.getContractFactory("ProfileNFTContract")
   const contract = await factory.deploy(ROUTER)
-  await contract.deployTransaction.wait(1)
 
-  console.log(`\nContract is deployed to ${network.name} at ${senderContract.address}`)
+  console.log(`\nContract is deployed to ${network.name} at ${contract.address}`)
 })

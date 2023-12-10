@@ -13,7 +13,7 @@ const functionsConsumerAbi = require("./functionsAbi.json");
 const ethers = require("ethers");
 require("@chainlink/env-enc").config();
 
-const consumerAddress = "0xbc4E04E1be7530f1B6DFf79b05d6C51B6AD88d2a"; // REPLACE this with your Functions consumer address
+const consumerAddress = "0x94aE5643b9195F552EF793f31764a0b796A8BAeA"; // REPLACE this with your Functions consumer address
 const subscriptionId = 1864; // REPLACE this with your subscription ID
 
 const makeRequestFuji = async () => {
@@ -32,8 +32,9 @@ const makeRequestFuji = async () => {
     .readFileSync(path.resolve(__dirname, "sourceNFT.js"))
     .toString();
 
-  const args = ["some testing word"];
-  const secrets = { apiKey: process.env.NFT_API_KEY };
+  const args = ["excited puppy jumping up and down", '0'];
+  const secretsUrls = [process.env.S3_SECRET_URL]
+  const secrets = {apiKey: process.env.NFT_API_KEY}
   const slotIdNumber = 0; // slot ID where to upload the secrets
   const expirationTimeMinutes = 15; // expiration time in minutes of the secrets
   const gasLimit = 300000;
@@ -123,29 +124,11 @@ const makeRequestFuji = async () => {
   await secretsManager.initialize();
 
   // Encrypt secrets and upload to DON
-  const encryptedSecretsObj = await secretsManager.encryptSecrets(secrets);
-
-  console.log(
-    `Upload encrypted secret to gateways ${gatewayUrls}. slotId ${slotIdNumber}. Expiration in minutes: ${expirationTimeMinutes}`
-  );
-  // Upload secrets
-  const uploadResult = await secretsManager.uploadEncryptedSecretsToDON({
-    encryptedSecretsHexstring: encryptedSecretsObj.encryptedSecrets,
-    gatewayUrls: gatewayUrls,
-    slotId: slotIdNumber,
-    minutesUntilExpiration: expirationTimeMinutes,
-  });
-
-  if (!uploadResult.success)
-    throw new Error(`Encrypted secrets not uploaded to ${gatewayUrls}`);
-
-  console.log(
-    `\n✅ Secrets uploaded properly to gateways ${gatewayUrls}! Gateways response: `,
-    uploadResult
+  const encryptedSecretsUrls = await secretsManager.encryptSecretsUrls(
+    secretsUrls
   );
 
-  const donHostedSecretsVersion = parseInt(uploadResult.version); // fetch the reference of the encrypted secrets
-  console.log(donHostedSecretsVersion)
+
 
   const functionsConsumer = new ethers.Contract(
     consumerAddress,
@@ -153,18 +136,12 @@ const makeRequestFuji = async () => {
     signer
   );
 
-  /*
   // Actual transaction call
-  const transaction = await functionsConsumer.sendRequest(
+  const transaction = await functionsConsumer.mintRequest(
     source, // source
-    "0x", // user hosted secrets - encryptedSecretsUrls - empty in this example
-    slotIdNumber, // slot ID of the encrypted secrets
-    donHostedSecretsVersion, // version of the encrypted secrets
+    encryptedSecretsUrls, // user hosted secrets - encryptedSecretsUrls - empty in this example
     args,
-    [], // bytesArgs - arguments can be encoded off-chain to bytes.
     subscriptionId,
-    gasLimit,
-    ethers.utils.formatBytes32String(donId) // jobId is bytes32 representation of donId
   );
 
   // Log transaction details
@@ -244,7 +221,6 @@ const makeRequestFuji = async () => {
       console.error("Error listening for response:", error);
     }
   })();
-  */
   
 };
 

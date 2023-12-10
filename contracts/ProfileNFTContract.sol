@@ -2,14 +2,16 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/FunctionsClient.sol";
 import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
 
-contract ProfileNFTContract is ERC721, Pausable, FunctionsClient, ConfirmedOwner {
+contract ProfileNFTContract is ERC721Enumerable, Pausable, FunctionsClient, ConfirmedOwner {
     using FunctionsRequest for FunctionsRequest.Request;
     uint256 private _tokenIdCounter;
 
@@ -29,9 +31,14 @@ contract ProfileNFTContract is ERC721, Pausable, FunctionsClient, ConfirmedOwner
     bytes public s_lastResponse;
     bytes public s_lastError;
 
+    bytes32 donID = 0x66756e2d6176616c616e6368652d66756a692d31000000000000000000000000;
+    uint32 gasLimit = 30000;
+
     error UnexpectedRequestID(bytes32 requestId);
     // Response event
     event FunctionsResponse(bytes32 indexed requestId, bytes response, bytes err);
+
+    event RequestMismatch(bytes32 req1, bytes32 req2);
 
     // event for metadata being updated by the owner! backdoor for the contract owner :)
     event MetadataUpdated(uint256 indexed tokenId, string name, string description, string image);
@@ -73,22 +80,34 @@ contract ProfileNFTContract is ERC721, Pausable, FunctionsClient, ConfirmedOwner
         return _tokenMetadata[tokenId];
     }
 
+    function getLatestResponse() public view returns (bytes) {
+        return s_lastResponse;
+    }
+
+    function getLatestError() public view returns (bytes) {
+        return s_lastError;
+    }
+
     // mint requests is received, source function to generate AI image
     function mintRequest(
         string memory source,
         bytes memory encryptedSecretsUrl,
         string[] memory args,
-        uint64 subscriptionId,
-        uint32 gasLimit,
-        bytes32 donID
+        uint64 subscriptionId
     ) public returns (bytes32 requestId) {
         // prevent multiple mint requests
         require(balanceOf(msg.sender) == 0, "Address already owns an NFT");
 
+        // get the next token and build different args list
+        uint256 nextTokenId = _tokenIdCounter + 1;        
+        string[] memory fullArgs = new string[](2);
+        fullArgs[0] = args[0];
+        fullArgs[1] = Strings.toString(nextTokenId);
+
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(source);
         req.addSecretsReference(encryptedSecretsUrl);
-        req.setArgs(args);
+        req.setArgs(fullArgs);
         s_lastRequestId = _sendRequest(
             req.encodeCBOR(),
             subscriptionId,
@@ -104,7 +123,9 @@ contract ProfileNFTContract is ERC721, Pausable, FunctionsClient, ConfirmedOwner
         bytes memory response,
         bytes memory err
     ) internal override {
+        emit FunctionsResponse(requestId, response, err);
         if (s_lastRequestId != requestId) {
+            emit RequestMismatch(s_lastRequestId, requestId);
             revert UnexpectedRequestID(requestId);
         }
         s_lastResponse = response;

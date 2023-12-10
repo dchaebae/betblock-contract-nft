@@ -14,12 +14,21 @@
     "@nomicfoundation/hardhat-viem": "^1.0.1",
     "hardhat": "^2.19.2"
   },
+  "browser": {
+    "child_process": false,
+    "fs": false,
+    "os": false,
+    "path": false,
+    "crypto": false
+  },
   "dependencies": {
     "@chainlink/contracts": "^0.8.0",
     "@chainlink/env-enc": "^1.0.5",
+    "@chainlink/functions-toolkit": "^0.2.8",
     "@nomicfoundation/hardhat-toolbox-viem": "^2.0.0",
     "@openzeppelin/contracts": "^5.0.1",
     "axios": "^1.6.2",
-    "dotenv": "^16.3.1"
+    "dotenv": "^16.3.1",
+    "ethers": "5.7"
   }
 }

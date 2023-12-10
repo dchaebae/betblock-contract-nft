@@ -1,1 +1,1 @@
-exports.setupNFTContract = require("./01_setupContractFuji.js")
+exports.setupNFTContract = require("./01_setupNFTFuji.js")

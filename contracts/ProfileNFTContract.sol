@@ -32,7 +32,7 @@ contract ProfileNFTContract is ERC721Enumerable, Pausable, FunctionsClient, Conf
     bytes public s_lastError;
 
     bytes32 donID = 0x66756e2d6176616c616e6368652d66756a692d31000000000000000000000000;
-    uint32 gasLimit = 30000;
+    uint32 gasLimit = 300000;
 
     error UnexpectedRequestID(bytes32 requestId);
     // Response event
@@ -79,15 +79,7 @@ contract ProfileNFTContract is ERC721Enumerable, Pausable, FunctionsClient, Conf
         // require(_exists(tokenId), "Token does not exist");
         return _tokenMetadata[tokenId];
     }
-
-    function getLatestResponse() public view returns (bytes) {
-        return s_lastResponse;
-    }
-
-    function getLatestError() public view returns (bytes) {
-        return s_lastError;
-    }
-
+    
     // mint requests is received, source function to generate AI image
     function mintRequest(
         string memory source,

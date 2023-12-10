@@ -29,7 +29,7 @@ contract LendingBorrowingContract {
     // collateralRate is currently hard coded at 150% and interestRate is hardcoded to 2% 
     // These values should be optimized in the future through a proper asset specifc risk analysis 
     constructor() {
-        linkToken = IERC20(0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846);
+        borrowToken = IERC20(0x0b9d5D9136855f6FEc3c0993feE6E9CE8a297846);
         collateralRate = 150;
         interestRate = 20000000000000000000;
         linkFeed = AggregatorV3Interface(0x34C4c526902d88a3Aa98DB8a9b802603EB1E3470);
@@ -112,7 +112,7 @@ contract LendingBorrowingContract {
     function getMaxWithdrawal(address borrower) public view returns (uint256) {
         BorrowerInfo memory info = borrowers[borrower];
         uint256 maxBorrowableUSD = getMaxBorrowable(borrower);
-        uint256 collateralValueUSD = info.collateralDeposited * uint256(getLatesAvaxPrice()) / 1e8;
+        uint256 collateralValueUSD = info.collateralDeposited * uint256(getLatestAvaxPrice()) / 1e8;
         uint256 borrowedAmountUSD = info.tokensBorrowed * uint256(getLatestLinkPrice()) / 1e8;
 
         if (borrowedAmountUSD >= maxBorrowableUSD) {

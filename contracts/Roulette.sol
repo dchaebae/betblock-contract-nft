@@ -126,7 +126,7 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, ReentrancyGuard, Automat
 
         // check for straight bets and return a 35:1 payout
         if (betsArray[randomResult] > 0) { 
-            totalWinnings += betsArray[randomResult] * 35; 
+            totalWinnings += (betsArray[randomResult] * 35) + betsArray[randomResult] ; 
         }
 
         // check for split bets and payout is 17:1 
@@ -137,7 +137,7 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, ReentrancyGuard, Automat
 
                 // Check if the random result matches either of the two numbers
                 if (randomResult == number1 || randomResult == number2) {
-                    totalWinnings += betsArray[i] * 17; 
+                    totalWinnings += (betsArray[i] * 17) + betsArray[i]; 
                     // A number can only be part of one winning split bet
                     break;
                 }
@@ -152,7 +152,7 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, ReentrancyGuard, Automat
                 uint256 upperBound = lowerBound + 2;
 
                 if (randomResult >= lowerBound && randomResult <= upperBound && betsArray[betIndex] > 0) { 
-                    totalWinnings += betsArray[betIndex] * 11; 
+                    totalWinnings += (betsArray[betIndex] * 11) + betsArray[betIndex]; 
                     break; // Only one six-line bet can win, so we can break the loop
                 }
             }
@@ -177,7 +177,7 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, ReentrancyGuard, Automat
 
             // check if the random result is oen of the corner numbers 
             if ((randomResult == num1 || randomResult == num2 || randomResult == num3 || randomResult == num4) && betsArray[betIndex] > 0) { 
-                totalWinnings += betsArray[betIndex] * 8; 
+                totalWinnings += (betsArray[betIndex] * 8) + betsArray[betIndex]; 
             }
         }
 
@@ -190,7 +190,7 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, ReentrancyGuard, Automat
                 uint256 upperBound = lowerBound + 5; 
 
                 if (randomResult >= lowerBound && randomResult <= upperBound && betsArray[betIndex] > 0) {
-                    totalWinnings += betsArray[betIndex] * 5;
+                    totalWinnings += (betsArray[betIndex] * 5) + betsArray[betIndex];
                     break; // Only one six-line bet can win, so we can break the loop
                 }
             }
@@ -200,54 +200,54 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, ReentrancyGuard, Automat
         if (randomResult != 0) {
             // Check 1st column (1, 4, 7, ..., 34)
             if (randomResult % 3 == 1 && betsArray[145] > 0) {
-                totalWinnings += betsArray[145] * 2;
+                totalWinnings += (betsArray[145] * 2) + betsArray[145] ;
             }
             // Check 2nd column (2, 5, 8, ..., 35)
             else if (randomResult % 3 == 2 && betsArray[146] > 0) {
-                totalWinnings += betsArray[146] * 2;
+                totalWinnings += (betsArray[146] * 2) + betsArray[146];
             }
             // Check 3rd column (3, 6, 9, ..., 36)
             else if (randomResult % 3 == 0 && betsArray[147] > 0) {
-                totalWinnings += betsArray[147] * 2;
+                totalWinnings += (betsArray[147] * 2) + betsArray[147];
             }
         }
 
         // check for dozens and return a 2:1 payout 
         if (randomResult >= 1 && randomResult <= 12 && betsArray[148] > 0) {
             // 1st 12 number rolled, payout 1st 12 bet
-            totalWinnings += betsArray[148] * 2;
+            totalWinnings += (betsArray[148] * 2) + betsArray[148];
         } else if (randomResult >= 13 && randomResult <= 24 && betsArray[149] > 0) {
             // 2nd 12 number rolled, payout 2nd 12 bet
-            totalWinnings += betsArray[149] * 2;
+            totalWinnings += (betsArray[149] * 2) + betsArray[149];
         } else if (randomResult >= 25 && randomResult <= 36 && betsArray[150] > 0) {
             // 3rd 12 number rolled, payout 3rd 12 bet
-            totalWinnings += betsArray[150] * 2;
+            totalWinnings += (betsArray[150] * 2) + betsArray[150];
         }
 
         // check for red/black bets and return a 1:1 payout (index 151 and 152)
         if (randomResult != 0) { 
             if (isInArray(redNumbers, uint8(randomResult)) && betsArray[151] > 0 ) { 
-                totalWinnings += betsArray[151];
+                totalWinnings += betsArray[151] * 2;
             } else if (isInArray(blackNumbers, uint8(randomResult)) && betsArray[152] > 0) { 
-                totalWinnings += betsArray[152]; 
+                totalWinnings += betsArray[152] * 2; 
             }
         }
 
         // check for high/low bets and return a 1:1 payout (index 153 adn 154)
         if (randomResult >= 1 && randomResult <= 18 && betsArray[154] > 0) { 
-            totalWinnings += betsArray[154]; 
+            totalWinnings += betsArray[154] * 2; 
         } else if (randomResult >= 19 && randomResult <= 36 && betsArray[153] > 0) {
-            totalWinnings += betsArray[153]; 
+            totalWinnings += betsArray[153] * 2; 
         }
 
         // check for even/odd bets and return a 1:1 payout (idex 155 and 156)
         if (randomResult != 0) { 
             if (randomResult % 2 == 0 && betsArray[155] > 0) { 
                 // Even number rolled, payout even bet
-                totalWinnings += betsArray[155]; 
+                totalWinnings += betsArray[155] * 2; 
             } else if (randomResult % 2 !=0 && betsArray[156] > 0) { 
                 // Odd number rolled, payout odd bet 
-                totalWinnings += betsArray[156];
+                totalWinnings += betsArray[156] * 2;
             }
         }
 

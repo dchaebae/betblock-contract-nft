@@ -13,7 +13,7 @@ const functionsConsumerAbi = require("./functionsAbi.json");
 const ethers = require("ethers");
 require("@chainlink/env-enc").config();
 
-const consumerAddress = "0xB99424d0a50B6744BEB52E7d5310542066c38819"; // REPLACE this with your Functions consumer address
+const consumerAddress = "0xbc6227a28Ea3F3b3732D34637A5f1Bca0Dd6E823"; // REPLACE this with your Functions consumer address
 const subscriptionId = 1864; // REPLACE this with your subscription ID
 
 const makeRequestFuji = async () => {

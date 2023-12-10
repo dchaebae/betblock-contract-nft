@@ -6,6 +6,7 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
 * @title BetBlock Roulette Contract
@@ -18,7 +19,7 @@ import "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 // keyHash = 0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f
 // _linkToken = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
 
-contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, AutomationCompatibleInterface {
+contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, AutomationCompatibleInterface, Ownable {
     VRFCoordinatorV2Interface immutable COORDINATOR;
     IERC20 public linkToken;
 
@@ -39,6 +40,9 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, AutomationCompatibleInte
     // set up for Chainlink Automation
     bool private invokeUpkeep = false;
     uint256 public rollDiceRequestId;
+
+    // set forwarder for chainlink automation
+    address public s_forwarderAddress;
 
     // Define arrays for red and black numbers on the roulette wheel
     uint8[] private redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
@@ -296,10 +300,18 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, AutomationCompatibleInte
 
     // This function is called by the Chainlink Keeper network to perform any necessary upkeep
     function performUpkeep(bytes calldata) external override {
+        require(
+            msg.sender == s_forwarderAddress,
+            "This address does not have permission to call performUpkeep"
+        );
         (bool upkeepNeeded, ) = this.checkUpkeep("");
         if (upkeepNeeded){ 
             rollDice();
         }
+    }
+
+    function setForwarderAddress(address forwarderAddress) external onlyOwner {
+        s_forwarderAddress = forwarderAddress;
     }
 
     // Function to get the current winnings of a user

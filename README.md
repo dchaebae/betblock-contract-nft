@@ -17,7 +17,7 @@ Note: All contracts on Mumbai network were deployed with Remix.
 
 | Contract               | Address                                           |
 | ---------------------- | --------------------------------------------------|
-| roulette               | [`0xe99aA391B3C73A31Cc3e493dEC656cb32F3DA932`][1] |
+| roulette               | [`0x77D6119479Ec5aE22081E359c0004ebc8Ec1a040`][1] |
 | slots                  | [`0x7c3EC70A5E196e5C3600D225e223162897d17679`][2] |
 | pricing                | [`0x03e1B02901579f731D2e5150134d0FB792d44708`][3] |
 | lend/borrow            | [`0x3a424f11E1A9C04c8AFE5bf853653EBb94EAF3A3`][4] |
@@ -71,7 +71,7 @@ Since all the games so far are deployed on Polygon Mumbai and use LINK tokens to
 
 NFTs are AI generated using chainink functions
 
-[1]: https://
+[1]: https://mumbai.polygonscan.com/address/0x77D6119479Ec5aE22081E359c0004ebc8Ec1a040
 [2]: https://
 [3]: https://
 [4]: https://

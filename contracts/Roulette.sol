@@ -6,7 +6,6 @@ import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
 * @title BetBlock Roulette Contract
@@ -19,7 +18,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 // keyHash = 0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f
 // _linkToken = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
 
-contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, AutomationCompatibleInterface, Ownable {
+contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, AutomationCompatibleInterface {
     VRFCoordinatorV2Interface immutable COORDINATOR;
     IERC20 public linkToken;
 
@@ -28,6 +27,7 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, AutomationCompatibleInte
     uint32 public callbackGasLimit = 2500000;
     uint16 public requestConfirmations = 3;
     uint32 public numWords = 1;
+    address private newRoller;
 
     mapping(uint256 => address) private s_rollers;
     mapping(address => uint256) private s_results;
@@ -40,9 +40,6 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, AutomationCompatibleInte
     // set up for Chainlink Automation
     bool private invokeUpkeep = false;
     uint256 public rollDiceRequestId;
-
-    // set forwarder for chainlink automation
-    address public s_forwarderAddress;
 
     // Define arrays for red and black numbers on the roulette wheel
     uint8[] private redNumbers = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
@@ -95,15 +92,17 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, AutomationCompatibleInte
 
         playerBets[msg.sender] = betAmounts; 
 
-        emit BetPlaced(msg.sender, totalBetAmount);
+        // Store the address of the user who placed the bet
+        newRoller = msg.sender;
+
+        emit BetPlaced(newRoller, totalBetAmount);
 
         // After placing bets, mark that upkeep is needed for Chainlink Automation
         invokeUpkeep = true;
     }
 
-    // ERROR this needs to keep track of the original user of the placeBets function and managed through the contract state!!
-    function rollDice() public returns (uint256 requestId) {
-        require(playerBets[msg.sender].length > 0, "No bet placed");
+    function rollDice(address newroller) public returns (uint256 requestId) {
+        require(playerBets[newroller].length > 0, "No bet placed");
 
         requestId = COORDINATOR.requestRandomWords(
             s_keyHash, 
@@ -113,9 +112,9 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, AutomationCompatibleInte
             numWords
         );
         
-        s_rollers[requestId] = msg.sender;
+        s_rollers[requestId] = newroller;
 
-        emit DiceRolled(requestId, msg.sender);
+        emit DiceRolled(requestId, newroller);
 
         // After rolling dice, mark that no further upkeep is needed until the next bets are placed
         invokeUpkeep = false;
@@ -300,18 +299,10 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, AutomationCompatibleInte
 
     // This function is called by the Chainlink Keeper network to perform any necessary upkeep
     function performUpkeep(bytes calldata) external override {
-        require(
-            msg.sender == s_forwarderAddress,
-            "This address does not have permission to call performUpkeep"
-        );
         (bool upkeepNeeded, ) = this.checkUpkeep("");
         if (upkeepNeeded){ 
-            rollDice();
+            rollDice(newRoller);
         }
-    }
-
-    function setForwarderAddress(address forwarderAddress) external onlyOwner {
-        s_forwarderAddress = forwarderAddress;
     }
 
     // Function to get the current winnings of a user

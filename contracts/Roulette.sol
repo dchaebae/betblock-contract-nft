@@ -5,7 +5,6 @@ import "@chainlink/contracts/src/v0.8/interfaces/VRFCoordinatorV2Interface.sol";
 import "@chainlink/contracts/src/v0.8/VRFConsumerBaseV2.sol";
 import "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 
 /**
@@ -13,7 +12,13 @@ import "@chainlink/contracts/src/v0.8/automation/AutomationCompatible.sol";
 * @notice A contract that gets random values from Chainlink VRF V2 and uses it to play roulette
 */
 
-contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, ReentrancyGuard, AutomationCompatibleInterface {
+// For Mumbai deloyments: 
+// Current VRF Subscription ID is 6609 
+// vrfCoordinator = 0x7a1BaC17Ccc5b313516C5E16fb24f7659aA5ebed
+// keyHash = 0x4b09e658ed251bcafeebbc69400383d49f344ace09b9576fe248bb02c003fe9f
+// _linkToken = 0x326C977E6efc84E512bB9C30f76E30c160eD06FB
+
+contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, AutomationCompatibleInterface {
     VRFCoordinatorV2Interface immutable COORDINATOR;
     IERC20 public linkToken;
 
@@ -302,7 +307,7 @@ contract Roulette is VRFConsumerBaseV2, ConfirmedOwner, ReentrancyGuard, Automat
         return winnings[user];
     }
 
-    function withdrawWinnings() public nonReentrant {
+    function withdrawWinnings() public {
         uint256 amount = winnings[msg.sender];
         require(amount > 0, "No winnings to withdraw");
         winnings[msg.sender] = 0;

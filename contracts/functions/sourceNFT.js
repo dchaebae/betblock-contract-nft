@@ -1,24 +1,18 @@
-const words = args[0];
-const tokenId = args[1];
-if (!secrets.apiKey) {
-  throw Error('Need betblock key!');
-}
-const apiRequest = Functions.makeHttpRequest({
-  url: "https://api.betblock.fi/generateImage",
-  headers: {
-    "x-api-key": secrets.apiKey,
-    'Content-Type': 'application/json'
-  },
-  params: {
-    words: words,
-    tokenId: tokenId
-  },
-  timeout: 10000
-});
-const apiResponse = await apiRequest;
+// This functions get details about Star Wars characters. This example will showcase usage of HTTP requests and console.logs.
+// 1, 2, 3 etc.
+// Execute the API request (Promise)
+const apiResponse = await Functions.makeHttpRequest({
+  url: `https://swapi.dev/api/people/1/`
+})
+
 if (apiResponse.error) {
-  throw new Error("Response Error");
+  console.error(apiResponse.error)
+  throw Error("Request failed")
 }
-const val = apiResponse
-console.log(val)
-return Functions.encodeString(apiResponse)
+
+const { data } = apiResponse;
+
+console.log('API response data:', JSON.stringify(data, null, 2));
+console.log(data.name)
+// Return Character Name
+return Functions.encodeString(data.name)

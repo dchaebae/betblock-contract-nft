@@ -79,7 +79,7 @@ contract ProfileNFTContract is ERC721Enumerable, Pausable, FunctionsClient, Conf
         // require(_exists(tokenId), "Token does not exist");
         return _tokenMetadata[tokenId];
     }
-    
+
     // mint requests is received, source function to generate AI image
     function mintRequest(
         string memory source,
@@ -115,21 +115,21 @@ contract ProfileNFTContract is ERC721Enumerable, Pausable, FunctionsClient, Conf
         bytes memory response,
         bytes memory err
     ) internal override {
-        emit FunctionsResponse(requestId, response, err);
+        //emit FunctionsResponse(requestId, response, err);
         if (s_lastRequestId != requestId) {
-            emit RequestMismatch(s_lastRequestId, requestId);
+            //emit RequestMismatch(s_lastRequestId, requestId);
             revert UnexpectedRequestID(requestId);
         }
         s_lastResponse = response;
         s_lastError = err;
         emit FunctionsResponse(requestId, s_lastResponse, s_lastError);
 
-        (string memory cid, string memory name, string memory description, string memory image) = abi.decode(response, (string, string, string, string));
+        // (string memory cid, string memory name, string memory description, string memory image) = abi.decode(response, (string, string, string, string));
 
-        uint256 newTokenId = _tokenIdCounter + 1;
-        _safeMint(msg.sender, newTokenId);
-        _tokenIdCounter++;
+        // uint256 newTokenId = _tokenIdCounter + 1;
+        // _safeMint(msg.sender, newTokenId);
+        // _tokenIdCounter++;
 
-        _setTokenMetadata(newTokenId, cid, name, description, image);
+        // _setTokenMetadata(newTokenId, cid, name, description, image);
     }
 }

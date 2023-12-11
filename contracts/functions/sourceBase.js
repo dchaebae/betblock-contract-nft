@@ -19,4 +19,5 @@ if (apiResponse.error) {
   throw new Error("Response Error");
 }
 const val = apiResponse['data']
-return Functions.encodeString(val)
+console.log(val['image'])
+return Functions.encodeString(val['image'])

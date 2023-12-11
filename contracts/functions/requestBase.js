@@ -13,9 +13,9 @@ const functionsConsumerAbi = require("./functionsAbi.json"); // functionsAbi.jso
 const ethers = require("ethers");
 require("@chainlink/env-enc").config();
 
-const consumerAddress = "0x93ec732dc8d847ae8184af2421cbc19916262723"; // REPLACE this with your Functions consumer address
-// 0xd26a1DFf5A94A1a73E074cD1840d2E85810B699a
-// 0x93ec732dc8d847ae8184af2421cbc19916262723
+const consumerAddress = "0x93ec732dC8D847aE8184aF2421cBc19916262723"; // REPLACE this with your Functions consumer address
+// 0xd26a1DFf5A94A1a73E074cD1840d2E85810B699a BASE
+// 0xc2b96aAfD98b26F39782FF6a16404Eb3839F52Ec REAL
 const subscriptionId = 1864; // REPLACE this with your subscription ID
 
 // hardcoded for Polygon Mumbai
@@ -135,18 +135,20 @@ const makeRequestMumbai = async () => {
   );
 
   // Actual transaction call
-  const transaction = await functionsConsumer.sendRequest(
-    source, // source
-    encryptedSecretsUrls, // user hosted secrets - encryptedSecretsUrls - empty in this example
-    0, // don hosted secrets - slot ID - empty in this example
-    0, // don hosted secrets - version - empty in this example
-    args,
-    [], // bytesArgs - arguments can be encoded off-chain to bytes.
-    subscriptionId,
-    gasLimit,
-    ethers.utils.formatBytes32String(donId) // jobId is bytes32 representation of donId
-  );
-
+  // const transaction = await functionsConsumer.sendRequest(
+  //   source, // source
+  //   encryptedSecretsUrls, // user hosted secrets - encryptedSecretsUrls - empty in this example
+  //   0, // don hosted secrets - slot ID - empty in this example
+  //   0, // don hosted secrets - version - empty in this example
+  //   args,
+  //   [], // bytesArgs - arguments can be encoded off-chain to bytes.
+  //   subscriptionId,
+  //   gasLimit,
+  //   ethers.utils.formatBytes32String(donId) // jobId is bytes32 representation of donId
+  // );
+  const transaction = await functionsConsumer.mintRequest(
+    source, encryptedSecretsUrls, args, subscriptionId
+    )
   // Log transaction details
   console.log(
     `\n✅ Functions request sent! Transaction hash ${transaction.hash}. Waiting for a response...`

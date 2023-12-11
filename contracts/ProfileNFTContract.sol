@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
@@ -11,28 +11,18 @@ import {FunctionsClient} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_
 import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/dev/v1_0_0/libraries/FunctionsRequest.sol";
 
-contract ProfileNFTContract is ERC721Enumerable, Pausable, FunctionsClient, ConfirmedOwner {
+contract ProfileNFTContract is ERC721Enumerable, ERC721URIStorage, Pausable, FunctionsClient, ConfirmedOwner {
     using FunctionsRequest for FunctionsRequest.Request;
     uint256 private _tokenIdCounter;
-
-    // metadata of the NFT
-    struct NFTMetadata {
-        string name;
-        string description;
-        string imageCID;
-        string tokenURI;
-        uint256 createdAt;
-        uint256 updatedAt;
-    }
-    // map tokenId to tokenMetadata
-    mapping(uint256 => NFTMetadata) private _tokenMetadata;
 
     bytes32 public s_lastRequestId;
     bytes public s_lastResponse;
     bytes public s_lastError;
 
+    mapping(uint256 => address) public originalMinter; // hold tokenId -> address mapping
+
     bytes32 donID = 0x66756e2d6176616c616e6368652d66756a692d31000000000000000000000000;
-    uint32 gasLimit = 30000;
+    uint32 gasLimit = 300000;
 
     error UnexpectedRequestID(bytes32 requestId);
     // Response event
@@ -47,47 +37,37 @@ contract ProfileNFTContract is ERC721Enumerable, Pausable, FunctionsClient, Conf
         address router
     ) FunctionsClient(router) ConfirmedOwner(msg.sender) ERC721("Betblock Bio", "BBB") {}
 
-    function _setTokenMetadata(uint256 tokenId, string memory imageCID, string memory name, string memory description, string memory tokenURI) private {
-        NFTMetadata storage metadata = _tokenMetadata[tokenId];
-        metadata.name = name;
-        metadata.imageCID = imageCID;
-        metadata.description = description;
-        metadata.tokenURI = tokenURI;
-        metadata.updatedAt = block.timestamp;
-         
-        if (metadata.createdAt == 0) {
-            metadata.createdAt = block.timestamp;
-        } 
-        emit MetadataUpdated(tokenId, name, description, tokenURI);
+    // fill in the tokenURI
+    function tokenURI(uint256 tokenId) public view override(ERC721, ERC721URIStorage) returns (string memory) {
+        return super.tokenURI(tokenId);
     }
 
-    // Update Token metadata if contract owner invokes
-    function updateTokenMetadata(
-        uint256 tokenId,
-        string memory cid,
-        string memory name,
-        string memory description,
-        string memory image
-    ) public onlyOwner {
-        // require(_exists(tokenId), "Token does not exist");
-        require(ownerOf(tokenId) == msg.sender, "Only token owner can update metadata");
-        _setTokenMetadata(tokenId, cid, name, description, image);
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721Enumerable, ERC721URIStorage)
+        returns (bool) {
+        return super.supportsInterface(interfaceId);
     }
 
-    // get token metadata given tokenId
-    function getTokenMetadata(uint256 tokenId) public view returns (NFTMetadata memory) {
-        // require(_exists(tokenId), "Token does not exist");
-        return _tokenMetadata[tokenId];
+    // associate a tokenId with address as the original minter
+    function associateTokenWithAddress(uint256 tokenId, address _address) internal {
+        originalMinter[tokenId] = _address;
     }
 
-    function getLatestResponse() public view returns (bytes) {
-        return s_lastResponse;
+    // return the original address minter for associated token
+    function getAddressForTokenId(uint256 tokenId) external view returns (address) {
+        return originalMinter[tokenId];
     }
 
-    function getLatestError() public view returns (bytes) {
-        return s_lastError;
+    function _increaseBalance(address account, uint128 amount) internal override(ERC721, ERC721Enumerable) {
+      super._increaseBalance(account, amount);
     }
 
+    function _update(address to, uint256 tokenId, address auth) internal override(ERC721, ERC721Enumerable) returns (address) {
+      return super._update(to, tokenId, auth);
+    }
+    
     // mint requests is received, source function to generate AI image
     function mintRequest(
         string memory source,
@@ -97,12 +77,13 @@ contract ProfileNFTContract is ERC721Enumerable, Pausable, FunctionsClient, Conf
     ) public returns (bytes32 requestId) {
         // prevent multiple mint requests
         require(balanceOf(msg.sender) == 0, "Address already owns an NFT");
-
         // get the next token and build different args list
-        uint256 nextTokenId = _tokenIdCounter + 1;        
+        uint256 nextTokenId = _tokenIdCounter + 1;
         string[] memory fullArgs = new string[](2);
         fullArgs[0] = args[0];
         fullArgs[1] = Strings.toString(nextTokenId);
+
+        associateTokenWithAddress(nextTokenId, msg.sender);
 
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(source);
@@ -117,27 +98,34 @@ contract ProfileNFTContract is ERC721Enumerable, Pausable, FunctionsClient, Conf
         return s_lastRequestId;
     }
 
+    function sendRequestCBOR(
+        bytes memory request,
+        uint64 subscriptionId
+    ) external onlyOwner returns (bytes32 requestId) {
+        s_lastRequestId = _sendRequest(
+            request,
+            subscriptionId,
+            gasLimit,
+            donID
+        );
+        return s_lastRequestId;
+    }
+
     // fulfill the mint request here, invoke the mint
     function fulfillRequest(
         bytes32 requestId,
         bytes memory response,
         bytes memory err
     ) internal override {
-        emit FunctionsResponse(requestId, response, err);
         if (s_lastRequestId != requestId) {
-            emit RequestMismatch(s_lastRequestId, requestId);
             revert UnexpectedRequestID(requestId);
         }
+        uint256 nextTokenId = _tokenIdCounter + 1;
         s_lastResponse = response;
         s_lastError = err;
+        _safeMint(originalMinter[nextTokenId], nextTokenId);
+        _setTokenURI(_tokenIdCounter++, string(response));
+
         emit FunctionsResponse(requestId, s_lastResponse, s_lastError);
-
-        (string memory cid, string memory name, string memory description, string memory image) = abi.decode(response, (string, string, string, string));
-
-        uint256 newTokenId = _tokenIdCounter + 1;
-        _safeMint(msg.sender, newTokenId);
-        _tokenIdCounter++;
-
-        _setTokenMetadata(newTokenId, cid, name, description, image);
     }
 }

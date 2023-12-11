@@ -9,7 +9,7 @@ const {
   decodeResult,
   FulfillmentCode,
 } = require("@chainlink/functions-toolkit");
-const functionsConsumerAbi = require("./baseAbi.json");
+const functionsConsumerAbi = require("./baseAbi.json"); // functionsAbi.json
 const ethers = require("ethers");
 require("@chainlink/env-enc").config();
 

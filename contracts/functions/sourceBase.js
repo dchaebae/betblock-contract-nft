@@ -13,12 +13,10 @@ const apiRequest = Functions.makeHttpRequest({
     words: words,
     tokenId: tokenId
   },
-  timeout: 10000
 });
 const apiResponse = await apiRequest;
 if (apiResponse.error) {
   throw new Error("Response Error");
 }
-const val = apiResponse
-console.log(val)
-return Functions.encodeString(apiResponse)
+const val = apiResponse['data']
+return Functions.encodeString(val)

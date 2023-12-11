@@ -14,6 +14,7 @@ const ethers = require("ethers");
 require("@chainlink/env-enc").config();
 
 const consumerAddress = "0xd26a1DFf5A94A1a73E074cD1840d2E85810B699a"; // REPLACE this with your Functions consumer address
+// 0xDBe8d88F09a73b95a6E0f4cA630f052dd8D9488c
 const subscriptionId = 1864; // REPLACE this with your subscription ID
 
 // hardcoded for Polygon Mumbai

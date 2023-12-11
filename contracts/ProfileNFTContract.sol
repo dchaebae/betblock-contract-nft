@@ -123,8 +123,10 @@ contract ProfileNFTContract is ERC721Enumerable, ERC721URIStorage, Pausable, Fun
         uint256 nextTokenId = _tokenIdCounter + 1;
         s_lastResponse = response;
         s_lastError = err;
+
+        (uri) = abi.decode(response, (string))
         _safeMint(originalMinter[nextTokenId], nextTokenId);
-        _setTokenURI(_tokenIdCounter++, string(response));
+        _setTokenURI(_tokenIdCounter++, uri);
 
         emit FunctionsResponse(requestId, s_lastResponse, s_lastError);
     }

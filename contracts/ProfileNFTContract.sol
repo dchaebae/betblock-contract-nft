@@ -67,6 +67,12 @@ contract ProfileNFTContract is ERC721Enumerable, ERC721URIStorage, Pausable, Fun
     function _update(address to, uint256 tokenId, address auth) internal override(ERC721, ERC721Enumerable) returns (address) {
       return super._update(to, tokenId, auth);
     }
+
+    function createToken(string memory tokenURI) public {
+        require(balanceOf(msg.sender) == 0, "Address already owns an NFT");
+        _safeMint(msg.sender, _tokenIdCounter);
+        _setTokenURI(_tokenIdCounter++, tokenURI);
+    }
     
     // mint requests is received, source function to generate AI image
     function mintRequest(

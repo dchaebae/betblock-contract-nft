@@ -28,6 +28,8 @@ contract ProfileNFTContract is ERC721Enumerable, ERC721URIStorage, Pausable, Fun
     // Response event
     event FunctionsResponse(bytes32 indexed requestId, bytes response, bytes err);
 
+    event MintResponse(address addr, uint256 ti);
+
     event RequestMismatch(bytes32 req1, bytes32 req2);
 
     // event for metadata being updated by the owner! backdoor for the contract owner :)
@@ -68,10 +70,19 @@ contract ProfileNFTContract is ERC721Enumerable, ERC721URIStorage, Pausable, Fun
       return super._update(to, tokenId, auth);
     }
 
-    function createToken(string memory tokenURI) public {
-        require(balanceOf(msg.sender) == 0, "Address already owns an NFT");
+    function manualMint(string memory newTokenURI) public {
         _safeMint(msg.sender, _tokenIdCounter);
-        _setTokenURI(_tokenIdCounter++, tokenURI);
+        associateTokenWithAddress(_tokenIdCounter, msg.sender);
+        _setTokenURI(_tokenIdCounter++, newTokenURI);
+    }
+
+    function mintBioToken(string memory newTokenURI, uint256 tokenId) public {
+        address minterAddr = originalMinter[tokenId];
+        require(balanceOf(minterAddr) == 0, "Address already owns an NFT");
+        _safeMint(minterAddr, tokenId);
+        _setTokenURI(tokenId, newTokenURI);
+        _tokenIdCounter++;
+        emit MintResponse(minterAddr, _tokenIdCounter - 1);
     }
     
     // mint requests is received, source function to generate AI image
@@ -84,12 +95,11 @@ contract ProfileNFTContract is ERC721Enumerable, ERC721URIStorage, Pausable, Fun
         // prevent multiple mint requests
         require(balanceOf(msg.sender) == 0, "Address already owns an NFT");
         // get the next token and build different args list
-        uint256 nextTokenId = _tokenIdCounter + 1;
         string[] memory fullArgs = new string[](2);
         fullArgs[0] = args[0];
-        fullArgs[1] = Strings.toString(nextTokenId);
+        fullArgs[1] = Strings.toString(_tokenIdCounter);
 
-        associateTokenWithAddress(nextTokenId, msg.sender);
+        associateTokenWithAddress(_tokenIdCounter, msg.sender);
 
         FunctionsRequest.Request memory req;
         req.initializeRequestForInlineJavaScript(source);
@@ -117,7 +127,7 @@ contract ProfileNFTContract is ERC721Enumerable, ERC721URIStorage, Pausable, Fun
         return s_lastRequestId;
     }
 
-    // fulfill the mint request here, invoke the mint
+    // fulfill the mint request here
     function fulfillRequest(
         bytes32 requestId,
         bytes memory response,
@@ -126,13 +136,8 @@ contract ProfileNFTContract is ERC721Enumerable, ERC721URIStorage, Pausable, Fun
         if (s_lastRequestId != requestId) {
             revert UnexpectedRequestID(requestId);
         }
-        uint256 nextTokenId = _tokenIdCounter + 1;
         s_lastResponse = response;
         s_lastError = err;
-
-        (uri) = abi.decode(response, (string))
-        _safeMint(originalMinter[nextTokenId], nextTokenId);
-        _setTokenURI(_tokenIdCounter++, uri);
 
         emit FunctionsResponse(requestId, s_lastResponse, s_lastError);
     }

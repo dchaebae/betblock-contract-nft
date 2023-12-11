@@ -16,7 +16,7 @@
 | ---------------------- | ---------------------------------------------------|
 | lend/borrow            | [``][4] |
 | ccip-sender            | [`0x8276C6236De14002C4750eE21C6169D29e78AA60`][5] |
-| nft-minting            | [``][6] |
+| nft-minting            | [`0xC8010D7842d0282C0576c152D8bA3a46123f9FE4`][6] |
 
 ### Sepolia Network
 
@@ -65,5 +65,5 @@ Note: All contracts on Mumbai network were deployed with Remix.
 [3]: https://mumbai.polygonscan.com/address/0x0969ab26e7e06FEa347d293821Dcf53DB836865c
 [4]:  
 [5]: https://testnet.snowtrace.io/address/0x8276C6236De14002C4750eE21C6169D29e78AA60
-[6]: 
+[6]: https://testnet.snowtrace.io/address/0xC8010D7842d0282C0576c152D8bA3a46123f9FE4
 [7]: https://sepolia.etherscan.io/address/0x865B3358db605d839E64EeE2eb501986eE777D6b

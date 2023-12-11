@@ -25,15 +25,15 @@ Note: All contracts on Mumbai network were deployed with Remix.
 
 | Contract               | Address                                            |
 | ---------------------- | ---------------------------------------------------|
-| lend/borrow            | [``][] |
-| ccip-sender            | [`0x8276C6236De14002C4750eE21C6169D29e78AA60`][] |
-| nft-minting            | [``][] |
+| lend/borrow            | [``][4] |
+| ccip-sender            | [`0x8276C6236De14002C4750eE21C6169D29e78AA60`][5] |
+| nft-minting            | [``][6] |
 
 ### Sepolia Network
 
 | Contract               | Address                                            |
 | ---------------------- | ---------------------------------------------------|
-| ccip-protocol           | [`0x865B3358db605d839E64EeE2eb501986eE777D6b`][] |
+| ccip-protocol           | [`0x865B3358db605d839E64EeE2eb501986eE777D6b`][7] |
 
 
 ## Contract Overview 
@@ -68,6 +68,9 @@ Future improvements would be leveraging Chainlink's CCIP for secure asset transf
 NFTs are AI generated using chainink functions
 
 [1]: https://mumbai.polygonscan.com/address/0x77D6119479Ec5aE22081E359c0004ebc8Ec1a040
-[2]: https://
+[2]: https://mumbai.polygonscan.com/address/0x7c3EC70A5E196e5C3600D225e223162897d17679
 [3]: https://mumbai.polygonscan.com/address/0x0969ab26e7e06FEa347d293821Dcf53DB836865c
 [4]:  
+[5]: 
+[6]: https://testnet.snowtrace.io/address/0x8276C6236De14002C4750eE21C6169D29e78AA60
+[7]: https://sepolia.etherscan.io/address/0x865B3358db605d839E64EeE2eb501986eE777D6b
